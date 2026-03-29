@@ -117,11 +117,15 @@ export default async function ProfilePage({ params }: Props) {
       </div>
 
       {/* Custom Profile Section */}
-      {(user.profileHtml || user.profileCss) && (
+      {(user.profileHtml || user.profileCss || user.profileMode === "classic") && (
         <div className="bg-white rounded-2xl overflow-hidden mb-6 border border-white/20">
           <ProfileFrame
             html={user.profileHtml ?? ""}
             css={user.profileCss ?? ""}
+            mode={(user.profileMode === "blank" ? "blank" : "classic") as "classic" | "blank"}
+            displayName={user.displayName ?? user.username}
+            avatarUrl={user.avatarUrl ?? ""}
+            bio={user.bio ?? ""}
             height={600}
           />
         </div>

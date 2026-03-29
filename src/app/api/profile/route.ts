@@ -24,7 +24,7 @@ export async function PATCH(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { profileHtml, profileCss, displayName, bio, avatarUrl } = body;
+    const { profileHtml, profileCss, profileMode, displayName, bio, avatarUrl } = body;
 
     const updates: Record<string, string | null> = {};
 
@@ -45,6 +45,11 @@ export async function PATCH(req: NextRequest) {
     }
     if (bio !== undefined) {
       updates.bio = typeof bio === "string" ? bio.slice(0, MAX_BIO_LENGTH) : null;
+    }
+    if (profileMode !== undefined) {
+      if (profileMode === "classic" || profileMode === "blank") {
+        updates.profileMode = profileMode;
+      }
     }
     if (avatarUrl !== undefined) {
       if (avatarUrl && !isValidUrl(avatarUrl)) {

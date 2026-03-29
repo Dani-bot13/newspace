@@ -17,6 +17,7 @@ model User {
   avatarUrl   String?
   profileHtml String?
   profileCss  String?
+  profileMode String   @default("classic") // "classic" or "blank"
   createdAt   DateTime @default(now())
   posts       Post[]
   followers   Follow[] @relation("following")

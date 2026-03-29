@@ -19,10 +19,13 @@ export default async function SettingsProfilePage() {
       avatarUrl: true,
       profileHtml: true,
       profileCss: true,
+      profileMode: true,
     },
   });
 
   if (!user) redirect("/login");
+
+  const mode = (user.profileMode === "blank" ? "blank" : "classic") as "classic" | "blank";
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
@@ -42,38 +45,20 @@ export default async function SettingsProfilePage() {
       <div className="bg-white/10 backdrop-blur border border-white/20 rounded-2xl p-6">
         <h2 className="text-white font-semibold mb-2">Profile Customization</h2>
         <p className="text-blue-300 text-sm mb-4">
-          Write HTML and CSS to customize your profile page. Scripts are disabled for security.
+          {mode === "classic"
+            ? "Classic Mode: Paste old MySpace layout codes and they'll just work. Your HTML goes in the \"About Me\" section."
+            : "Blank Canvas: Full control. Write your own HTML + CSS from scratch."}
+          {" "}Scripts are always disabled for security.
         </p>
         <ProfileEditor
-          initialHtml={user.profileHtml ?? DEFAULT_HTML}
-          initialCss={user.profileCss ?? DEFAULT_CSS}
+          initialHtml={user.profileHtml ?? ""}
+          initialCss={user.profileCss ?? ""}
+          initialMode={mode}
+          displayName={user.displayName ?? user.username}
+          avatarUrl={user.avatarUrl ?? ""}
+          bio={user.bio ?? ""}
         />
       </div>
     </div>
   );
 }
-
-const DEFAULT_HTML = `<div class="profile-container">
-  <h1>Welcome to my space! ✨</h1>
-  <p>Edit this to make it your own.</p>
-  <marquee>Thanks for visiting! 🌟</marquee>
-</div>`;
-
-const DEFAULT_CSS = `body {
-  background: linear-gradient(135deg, #1a1a2e, #16213e);
-  color: #e0e0e0;
-  font-family: 'Georgia', serif;
-  padding: 2rem;
-}
-
-.profile-container {
-  max-width: 600px;
-  margin: 0 auto;
-  text-align: center;
-}
-
-h1 {
-  font-size: 2rem;
-  color: #ff6b9d;
-  text-shadow: 0 0 20px rgba(255, 107, 157, 0.5);
-}`;
