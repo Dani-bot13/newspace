@@ -35,6 +35,8 @@ model Post {
   createdAt DateTime  @default(now())
   likes     Like[]
   comments  Comment[]
+
+  @@index([userId, createdAt(sort: Desc)])
 }
 
 model Follow {
@@ -45,6 +47,7 @@ model Follow {
   createdAt   DateTime @default(now())
 
   @@id([followerId, followingId])
+  @@index([followingId])
 }
 
 model Comment {
@@ -55,6 +58,9 @@ model Comment {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   content   String
   createdAt DateTime @default(now())
+
+  @@index([postId, createdAt])
+  @@index([userId])
 }
 
 model Like {
@@ -65,4 +71,5 @@ model Like {
   createdAt DateTime @default(now())
 
   @@id([postId, userId])
+  @@index([userId])
 }

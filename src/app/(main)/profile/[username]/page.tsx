@@ -31,6 +31,9 @@ export default async function ProfilePage({ params }: Props) {
         include: {
           user: { select: { username: true, displayName: true, avatarUrl: true } },
           _count: { select: { likes: true, comments: true } },
+          ...(session?.user?.id
+            ? { likes: { where: { userId: session.user.id }, select: { userId: true } } }
+            : {}),
         },
       },
       _count: {
@@ -132,7 +135,7 @@ export default async function ProfilePage({ params }: Props) {
             {user.posts.map((post) => (
               <PostCard
                 key={post.id}
-                post={{ ...post, likes: [] }}
+                post={{ ...post, likes: (post as unknown as { likes?: { userId: string }[] }).likes ?? [] }}
                 currentUserId={session?.user?.id}
               />
             ))}

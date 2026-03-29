@@ -1,12 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import type { FeedPost } from "./Feed";
 
 interface Props {
   currentUserId: string;
   currentUsername: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onPost: (post: any) => void;
+  onPost: (post: FeedPost) => void;
 }
 
 export default function ComposeBox({ onPost }: Props) {

@@ -14,8 +14,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
 
+        const email = (credentials.email as string).toLowerCase().trim();
         const user = await db.user.findUnique({
-          where: { email: credentials.email as string },
+          where: { email },
         });
 
         if (!user) return null;
@@ -54,5 +55,5 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   pages: {
     signIn: "/login",
   },
-  session: { strategy: "jwt" },
+  session: { strategy: "jwt", maxAge: 30 * 24 * 60 * 60 }, // 30 days
 });

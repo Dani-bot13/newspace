@@ -26,7 +26,7 @@ export default function ProfileFrame({ html, css, height = 600 }: ProfileFramePr
   return (
     <iframe
       srcDoc={srcDoc}
-      sandbox="allow-same-origin allow-popups allow-popups-to-escape-sandbox"
+      sandbox="allow-same-origin"
       style={{ width: "100%", height: `${height}px`, border: "none" }}
       title="Profile preview"
     />

@@ -13,6 +13,7 @@ export function sanitizeProfileHtml(html: string): string {
       "table", "tr", "td", "th", "thead", "tbody",
       "strong", "em", "b", "i", "u", "s", "br", "hr",
       "marquee", "blink", "center", "blockquote", "pre", "code",
+      "section", "article", "header", "footer", "nav", "figure", "figcaption",
     ],
     ALLOWED_ATTR: [
       "src", "href", "style", "class", "id", "target",
@@ -20,21 +21,43 @@ export function sanitizeProfileHtml(html: string): string {
       "muted", "poster", "type", "colspan", "rowspan",
       "align", "valign", "bgcolor", "border", "cellpadding", "cellspacing",
     ],
+    FORBID_TAGS: ["script", "style", "iframe", "object", "embed", "form", "input", "textarea", "select", "button"],
     FORBID_ATTR: [
       "onerror", "onload", "onclick", "onmouseover", "onmouseout",
       "onfocus", "onblur", "onchange", "onsubmit", "onkeydown",
-      "onkeyup", "onkeypress", "oninput",
+      "onkeyup", "onkeypress", "oninput", "onanimationend",
+      "ontransitionend", "onwheel", "onscroll",
     ],
+    ALLOW_ARIA_ATTR: false,
+    ALLOW_DATA_ATTR: false,
     FORCE_BODY: true,
   });
 }
 
+// Dangerous CSS patterns — matched case-insensitively
+const CSS_BLOCKLIST = [
+  /@import\b/i,
+  /@charset\b/i,
+  /expression\s*\(/i,
+  /javascript\s*:/i,
+  /vbscript\s*:/i,
+  /behavior\s*:/i,
+  /-moz-binding\s*:/i,
+  /-webkit-binding\s*:/i,
+  /url\s*\(\s*["']?\s*data\s*:/i,   // block data: URIs in url()
+];
+
 export function sanitizeProfileCss(css: string): string {
-  // Strip any @import rules and url() with javascript:, data: URIs for non-image content
-  return css
-    .replace(/@import\s+[^;]+;/gi, "")
-    .replace(/expression\s*\([^)]*\)/gi, "")
-    .replace(/javascript:/gi, "")
-    .replace(/behavior\s*:/gi, "")
-    .replace(/-moz-binding\s*:/gi, "");
+  // Process line-by-line to remove dangerous declarations
+  const lines = css.split("\n");
+  const cleaned = lines
+    .map((line) => {
+      for (const pattern of CSS_BLOCKLIST) {
+        if (pattern.test(line)) return "/* blocked */";
+      }
+      return line;
+    })
+    .join("\n");
+
+  return cleaned;
 }
