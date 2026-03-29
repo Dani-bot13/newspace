@@ -66,6 +66,10 @@ logs/
 CLAUDE.md
 .claude/
 
+# ===== Project docs (local only) =====
+OVERVIEW.md
+CHECKLIST.md
+
 # ===== Misc =====
 .cache
 tmp/
