@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef, useCallback } from "react";
 import { buildClassicSkeleton, CLASSIC_DEFAULT_CSS } from "@/lib/classic-skeleton";
 
 interface ProfileFrameProps {
@@ -9,7 +10,7 @@ interface ProfileFrameProps {
   displayName?: string;
   avatarUrl?: string;
   bio?: string;
-  height?: number;
+  height?: number; // optional fixed height (used in editor preview)
 }
 
 export default function ProfileFrame({
@@ -19,13 +20,14 @@ export default function ProfileFrame({
   displayName = "",
   avatarUrl = "",
   bio = "",
-  height = 600,
+  height,
 }: ProfileFrameProps) {
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+
   let bodyContent: string;
   let styleContent: string;
 
   if (mode === "classic") {
-    // Classic mode: render the MySpace skeleton, inject user CSS as overrides
     const skeleton = buildClassicSkeleton({
       displayName: displayName || "NewSpace User",
       avatarUrl: avatarUrl || "",
@@ -33,7 +35,6 @@ export default function ProfileFrame({
       userHtml: html,
     });
     bodyContent = skeleton;
-    // Layer: base reset → classic defaults → user CSS overrides
     styleContent = `
       * { box-sizing: border-box; }
       img { max-width: 100%; }
@@ -41,7 +42,6 @@ export default function ProfileFrame({
       ${css}
     `;
   } else {
-    // Blank canvas mode: user controls everything
     bodyContent = html;
     styleContent = `
       * { box-sizing: border-box; }
@@ -62,11 +62,46 @@ export default function ProfileFrame({
   <body>${bodyContent}</body>
 </html>`;
 
+  // Auto-resize iframe to content height (only when no fixed height)
+  const resize = useCallback(() => {
+    const iframe = iframeRef.current;
+    if (!iframe || height) return;
+    try {
+      const doc = iframe.contentDocument;
+      if (doc?.body) {
+        const h = doc.body.scrollHeight;
+        iframe.style.height = `${Math.max(h, 400)}px`;
+      }
+    } catch {
+      // cross-origin or not ready
+    }
+  }, [height]);
+
+  useEffect(() => {
+    const iframe = iframeRef.current;
+    if (!iframe || height) return;
+    iframe.addEventListener("load", resize);
+    // Also poll briefly for late-loading images/fonts
+    const t1 = setTimeout(resize, 500);
+    const t2 = setTimeout(resize, 1500);
+    return () => {
+      iframe.removeEventListener("load", resize);
+      clearTimeout(t1);
+      clearTimeout(t2);
+    };
+  }, [resize, height, srcDoc]);
+
   return (
     <iframe
+      ref={iframeRef}
       srcDoc={srcDoc}
       sandbox="allow-same-origin"
-      style={{ width: "100%", height: `${height}px`, border: "none" }}
+      style={{
+        width: "100%",
+        height: height ? `${height}px` : "800px", // default before auto-resize
+        border: "none",
+        display: "block",
+      }}
       title="Profile preview"
     />
   );

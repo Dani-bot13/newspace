@@ -54,71 +54,63 @@ export default async function ProfilePage({ params }: Props) {
     isFollowing = !!follow;
   }
 
-  return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
-      {/* Profile Header */}
-      <div className="bg-white/10 backdrop-blur border border-white/20 rounded-2xl p-6 mb-6">
-        <div className="flex items-start gap-5">
-          <div className="relative w-24 h-24 rounded-full overflow-hidden bg-blue-700 flex-shrink-0">
-            {user.avatarUrl ? (
-              <Image src={user.avatarUrl} alt={user.username} fill className="object-cover" />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-3xl text-white font-bold">
-                {(user.displayName ?? user.username).charAt(0).toUpperCase()}
-              </div>
-            )}
-          </div>
+  const hasCustomProfile = user.profileHtml || user.profileCss || user.profileMode === "classic";
 
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center justify-between flex-wrap gap-3">
-              <div>
-                <h1 className="text-2xl font-bold text-white">
+  return (
+    <div className="-mt-16">
+      {/* ── Floating profile bar (overlays top of iframe) ── */}
+      <div className="sticky top-16 z-40">
+        <div className="bg-black/60 backdrop-blur-md border-b border-white/10">
+          <div className="max-w-6xl mx-auto px-4 py-2 flex items-center gap-3">
+            {/* Avatar */}
+            <div className="relative w-9 h-9 rounded-full overflow-hidden bg-blue-700 flex-shrink-0">
+              {user.avatarUrl ? (
+                <Image src={user.avatarUrl} alt={user.username} fill className="object-cover" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-sm text-white font-bold">
+                  {(user.displayName ?? user.username).charAt(0).toUpperCase()}
+                </div>
+              )}
+            </div>
+
+            {/* Name + stats */}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2">
+                <h1 className="text-white font-semibold text-sm truncate">
                   {user.displayName ?? user.username}
                 </h1>
-                <p className="text-blue-300">@{user.username}</p>
+                <span className="text-blue-400 text-xs">@{user.username}</span>
               </div>
-              <div className="flex gap-2">
-                {isOwner ? (
-                  <Link
-                    href="/settings/profile"
-                    className="bg-white/10 hover:bg-white/20 text-white border border-white/20 px-4 py-1.5 rounded-lg text-sm font-medium transition-colors"
-                  >
-                    Edit Profile
-                  </Link>
-                ) : session ? (
-                  <FollowButton
-                    targetUserId={user.id}
-                    initialFollowing={isFollowing}
-                  />
-                ) : null}
+              <div className="flex gap-4 text-xs text-blue-300">
+                <span><strong className="text-white">{user._count.posts}</strong> posts</span>
+                <span><strong className="text-white">{user._count.followers}</strong> followers</span>
+                <span><strong className="text-white">{user._count.following}</strong> following</span>
               </div>
             </div>
 
-            {user.bio && (
-              <p className="text-blue-100 mt-3 text-sm">{user.bio}</p>
-            )}
-
-            <div className="flex gap-6 mt-4 text-sm">
-              <span className="text-white">
-                <strong>{user._count.posts}</strong>{" "}
-                <span className="text-blue-300">posts</span>
-              </span>
-              <span className="text-white">
-                <strong>{user._count.followers}</strong>{" "}
-                <span className="text-blue-300">followers</span>
-              </span>
-              <span className="text-white">
-                <strong>{user._count.following}</strong>{" "}
-                <span className="text-blue-300">following</span>
-              </span>
+            {/* Actions */}
+            <div className="flex items-center gap-2">
+              {isOwner ? (
+                <Link
+                  href="/settings/profile"
+                  className="bg-white/10 hover:bg-white/20 text-white border border-white/20 px-3 py-1 rounded-lg text-xs font-medium transition-colors"
+                >
+                  Edit Profile
+                </Link>
+              ) : session ? (
+                <FollowButton
+                  targetUserId={user.id}
+                  initialFollowing={isFollowing}
+                />
+              ) : null}
             </div>
           </div>
         </div>
       </div>
 
-      {/* Custom Profile Section */}
-      {(user.profileHtml || user.profileCss || user.profileMode === "classic") && (
-        <div className="bg-white rounded-2xl overflow-hidden mb-6 border border-white/20">
+      {/* ── Profile iframe (full width, takes over the page) ── */}
+      {hasCustomProfile ? (
+        <div className="w-full bg-white">
           <ProfileFrame
             html={user.profileHtml ?? ""}
             css={user.profileCss ?? ""}
@@ -126,14 +118,33 @@ export default async function ProfilePage({ params }: Props) {
             displayName={user.displayName ?? user.username}
             avatarUrl={user.avatarUrl ?? ""}
             bio={user.bio ?? ""}
-            height={600}
           />
+        </div>
+      ) : (
+        /* No custom profile — show a default hero */
+        <div className="flex items-center justify-center py-24 px-4">
+          <div className="text-center">
+            <div className="relative w-28 h-28 rounded-full overflow-hidden bg-blue-700 mx-auto mb-4">
+              {user.avatarUrl ? (
+                <Image src={user.avatarUrl} alt={user.username} fill className="object-cover" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-4xl text-white font-bold">
+                  {(user.displayName ?? user.username).charAt(0).toUpperCase()}
+                </div>
+              )}
+            </div>
+            <h1 className="text-3xl font-bold text-white mb-1">
+              {user.displayName ?? user.username}
+            </h1>
+            <p className="text-blue-300 mb-3">@{user.username}</p>
+            {user.bio && <p className="text-blue-100 text-sm max-w-md mx-auto">{user.bio}</p>}
+          </div>
         </div>
       )}
 
-      {/* Recent Posts */}
+      {/* ── Posts section ── */}
       {user.posts.length > 0 && (
-        <div>
+        <div className="max-w-2xl mx-auto px-4 py-8">
           <h2 className="text-white font-semibold text-lg mb-4">Recent Posts</h2>
           <div className="space-y-4">
             {user.posts.map((post) => (
