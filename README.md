@@ -1,6 +1,6 @@
 # NewSpace
 
-A modern reimagining of MySpace. Customize your profile with raw HTML & CSS, post status updates, follow friends.
+A modern reimagining of MySpace. Customize your profile with raw HTML & CSS, post status updates, follow friends. IT'S A WORK IN PROGESS AND UGLYYYY! 
 
 ## Stack
 
