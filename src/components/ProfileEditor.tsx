@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import ProfileFrame from "./ProfileFrame";
 
@@ -23,6 +24,7 @@ export default function ProfileEditor({
   avatarUrl,
   bio,
 }: ProfileEditorProps) {
+  const router = useRouter();
   const [html, setHtml] = useState(initialHtml);
   const [css, setCss] = useState(initialCss);
   const [mode, setMode] = useState<"classic" | "blank">(initialMode);
@@ -46,13 +48,14 @@ export default function ProfileEditor({
       } else {
         setSaved(true);
         setTimeout(() => setSaved(false), 2000);
+        router.refresh();
       }
     } catch {
       setError("Network error");
     } finally {
       setSaving(false);
     }
-  }, [html, css, mode]);
+  }, [html, css, mode, router]);
 
   return (
     <div className="flex flex-col gap-4">
@@ -125,9 +128,9 @@ export default function ProfileEditor({
 
           <div className="flex-1 rounded-lg overflow-hidden border border-white/20 min-h-[400px]">
             {activeTab === "html" ? (
-              <CodeMirrorEditor value={html} onChange={setHtml} language="html" />
+              <CodeMirrorEditor key="html" value={html} onChange={setHtml} language="html" />
             ) : (
-              <CodeMirrorEditor value={css} onChange={setCss} language="css" />
+              <CodeMirrorEditor key="css" value={css} onChange={setCss} language="css" />
             )}
           </div>
 

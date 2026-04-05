@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useCallback } from "react";
 import { buildClassicSkeleton, CLASSIC_DEFAULT_CSS } from "@/lib/classic-skeleton";
+import type { SkeletonPost } from "@/lib/classic-skeleton";
 
 interface ProfileFrameProps {
   html: string;
@@ -10,6 +11,7 @@ interface ProfileFrameProps {
   displayName?: string;
   avatarUrl?: string;
   bio?: string;
+  posts?: SkeletonPost[];
   height?: number; // optional fixed height (used in editor preview)
 }
 
@@ -20,6 +22,7 @@ export default function ProfileFrame({
   displayName = "",
   avatarUrl = "",
   bio = "",
+  posts = [],
   height,
 }: ProfileFrameProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -33,6 +36,7 @@ export default function ProfileFrame({
       avatarUrl: avatarUrl || "",
       bio: bio || "",
       userHtml: html,
+      posts,
     });
     bodyContent = skeleton;
     styleContent = `

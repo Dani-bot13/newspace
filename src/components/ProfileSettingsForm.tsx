@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 interface Props {
   initialDisplayName: string;
@@ -9,6 +10,7 @@ interface Props {
 }
 
 export default function ProfileSettingsForm({ initialDisplayName, initialBio, initialAvatarUrl }: Props) {
+  const router = useRouter();
   const [displayName, setDisplayName] = useState(initialDisplayName);
   const [bio, setBio] = useState(initialBio);
   const [avatarUrl, setAvatarUrl] = useState(initialAvatarUrl);
@@ -32,6 +34,8 @@ export default function ProfileSettingsForm({ initialDisplayName, initialBio, in
       } else {
         setSaved(true);
         setTimeout(() => setSaved(false), 2000);
+        // Re-render the page with fresh DB data so the preview picks up changes
+        router.refresh();
       }
     } catch {
       setError("Network error");

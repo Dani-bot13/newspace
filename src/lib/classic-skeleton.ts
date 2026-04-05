@@ -1,25 +1,32 @@
 /**
  * Classic MySpace profile HTML skeleton.
  *
- * This faithfully recreates the class names and nested table structure
- * of the original MySpace profile page so that old layout codes
- * (Pimp My Profile, etc.) can target the right elements.
+ * Simplified version: profile photo, About Me, music player,
+ * and background photo support. Friends list, interests, and
+ * Tom removed per user request.
  *
  * Placeholders replaced at render time:
- *   {{displayName}}  — user's display name
- *   {{avatarUrl}}    — user's avatar (or default)
- *   {{bio}}          — user's bio text
- *   {{age}}          — placeholder
- *   {{userContent}}  — user's custom HTML goes here
+ *   displayName — user's display name
+ *   avatarUrl   — user's avatar (or default)
+ *   bio         — user's bio text
+ *   userHtml    — user's custom HTML goes here
  */
+
+export interface SkeletonPost {
+  content: string | null;
+  createdAt: string; // pre-formatted date string
+  likeCount: number;
+  commentCount: number;
+}
 
 export function buildClassicSkeleton(opts: {
   displayName: string;
   avatarUrl: string;
   bio: string;
   userHtml: string;
+  posts?: SkeletonPost[];
 }) {
-  const { displayName, avatarUrl, bio, userHtml } = opts;
+  const { displayName, avatarUrl, bio, userHtml, posts = [] } = opts;
 
   const avatar = avatarUrl || "";
   const avatarImg = avatar
@@ -29,7 +36,7 @@ export function buildClassicSkeleton(opts: {
   return `
 <div class="bodyContent">
 
-<!-- ====== MAIN PROFILE TABLE (3+ levels of nesting, just like the original) ====== -->
+<!-- ====== MAIN PROFILE TABLE ====== -->
 <table id="profileV1main" width="800" cellspacing="0" cellpadding="0" align="center" border="0">
 <tr>
 
@@ -69,10 +76,10 @@ export function buildClassicSkeleton(opts: {
   <table class="contactTable" width="275" cellspacing="3" cellpadding="3" border="0">
     <tr>
       <td>
-        <table width="100%" cellspacing="0" cellpadding="0" border="0" bgcolor="#003366">
+        <table width="100%" cellspacing="0" cellpadding="0" border="0" bgcolor="#003366" style="background-color:#003366;">
           <tr>
-            <td align="center">
-              <span class="whitetext12">Contacting <span class="nametext">${escapeHtml(displayName)}</span></span>
+            <td align="center" style="padding:4px;">
+              <span class="whitetext12">Contacting <span class="nametext" style="color:#fff;">${escapeHtml(displayName)}</span></span>
             </td>
           </tr>
         </table>
@@ -85,36 +92,24 @@ export function buildClassicSkeleton(opts: {
             <td align="center"><a href="#" class="contactTableLink">Instant Message</a></td>
             <td align="center"><a href="#" class="contactTableLink">Block User</a></td>
           </tr>
-          <tr>
-            <td align="center"><a href="#" class="contactTableLink">Add to Group</a></td>
-            <td align="center"><a href="#" class="contactTableLink">Add to Favorites</a></td>
-          </tr>
         </table>
       </td>
     </tr>
   </table>
 
-  <!-- Interests Table -->
-  <table class="sidebar-table" width="100%" cellspacing="3" cellpadding="3" border="0">
-    <tr>
-      <td><span class="orangetext15"><b>${escapeHtml(displayName)}'s Interests</b></span></td>
-    </tr>
+  <!-- Music Player -->
+  <table class="musicPlayer" width="100%" cellspacing="3" cellpadding="3" border="0">
     <tr>
       <td>
-        <table width="100%" cellspacing="0" cellpadding="2" border="0">
-          <tr><td valign="top"><span class="lightbluetext8">General</span></td>
-              <td class="text">Music, Friends, Coding, Internet</td></tr>
-          <tr><td valign="top"><span class="lightbluetext8">Music</span></td>
-              <td class="text">Everything</td></tr>
-          <tr><td valign="top"><span class="lightbluetext8">Movies</span></td>
-              <td class="text">The classics</td></tr>
-          <tr><td valign="top"><span class="lightbluetext8">Television</span></td>
-              <td class="text">Reality TV</td></tr>
-          <tr><td valign="top"><span class="lightbluetext8">Books</span></td>
-              <td class="text">Harry Potter</td></tr>
-          <tr><td valign="top"><span class="lightbluetext8">Heroes</span></td>
-              <td class="text">Tom from MySpace</td></tr>
-        </table>
+        <span class="orangetext15"><b>${escapeHtml(displayName)}'s Music</b></span>
+      </td>
+    </tr>
+    <tr>
+      <td class="text">
+        <div class="profileMusic">
+          <p class="musicPlaceholder">Add a song to your profile!</p>
+          <audio class="profileAudioPlayer" controls preload="none" style="width:100%;"></audio>
+        </div>
       </td>
     </tr>
   </table>
@@ -157,76 +152,35 @@ export function buildClassicSkeleton(opts: {
                 </div>
               </td>
             </tr>
-            <tr>
-              <td>
-                <span class="orangetext15"><b>Who I'd Like to Meet</b></span>
-              </td>
-            </tr>
-            <tr>
-              <td class="text">
-                <div class="blurbLikeToMeet">
-                  <p>Cool people who share my interests.</p>
-                </div>
-              </td>
-            </tr>
           </table>
         </td>
       </tr>
     </table>
   </div>
 
-  <!-- Friend Space -->
-  <table class="friendSpace" width="100%" cellspacing="3" cellpadding="3" border="0">
+  <!-- Posts / Status Updates -->
+  ${posts.length > 0 ? `
+  <table class="profilePosts" width="100%" cellspacing="3" cellpadding="3" border="0">
     <tr>
       <td>
-        <span class="orangetext15"><b>${escapeHtml(displayName)}'s Friend Space</b></span>
-        <span class="text"> (<span class="redbtext">Top 8</span>)</span>
+        <span class="orangetext15"><b>${escapeHtml(displayName)}'s Posts</b></span>
       </td>
     </tr>
+    ${posts.map((post) => `
     <tr>
       <td class="text">
-        <table width="100%" cellspacing="3" cellpadding="3" border="0">
-          <tr>
-            <td align="center" width="25%">
-              <a href="#">
-                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Crect fill='%23336699' width='60' height='60'/%3E%3Ctext x='30' y='35' font-size='14' fill='white' text-anchor='middle'%3ETom%3C/text%3E%3C/svg%3E" width="60" height="60" alt="Tom" />
-              </a><br/>
-              <span class="blacktext10">Tom</span>
-            </td>
-            <td align="center" width="25%">
-              <span class="text">Add more friends!</span>
-            </td>
-            <td width="25%"></td>
-            <td width="25%"></td>
-          </tr>
-        </table>
+        <div class="postEntry">
+          <div class="postContent">${escapeHtml(post.content || "")}</div>
+          <div class="postMeta">
+            <span class="postDate">${escapeHtml(post.createdAt)}</span>
+            <span class="postStats">♥ ${post.likeCount} · 💬 ${post.commentCount}</span>
+          </div>
+        </div>
       </td>
     </tr>
+    `).join("")}
   </table>
-
-  <!-- Comments Section -->
-  <table class="friendsComments" width="100%" cellspacing="3" cellpadding="3" border="0">
-    <tr>
-      <td>
-        <span class="orangetext15"><b>${escapeHtml(displayName)}'s Comments</b></span>
-      </td>
-    </tr>
-    <tr>
-      <td class="text">
-        <table width="100%" cellspacing="0" cellpadding="3" border="0">
-          <tr>
-            <td class="blacktext10" valign="top" align="center" width="100">
-              <b>Tom</b><br/>
-              <span class="redtext">3/28/2026</span>
-            </td>
-            <td class="text" valign="top">
-              Welcome to NewSpace! Thanks for the add :)
-            </td>
-          </tr>
-        </table>
-      </td>
-    </tr>
-  </table>
+  ` : ""}
 
 </td>
 </tr>
@@ -293,14 +247,15 @@ body {
 
 /* Body text */
 .text, .btext {
+  color: #000;
   font-size: 10pt;
   font-family: Verdana, Arial, sans-serif;
 }
 .btext { font-weight: bold; }
 
 /* Small text classes */
-.blacktext12 { font-size: 11pt; font-family: Georgia, serif; }
-.blacktext10 { font-size: 9pt; font-family: monospace; }
+.blacktext12 { color: #000; font-size: 11pt; font-family: Georgia, serif; }
+.blacktext10 { color: #000; font-size: 9pt; font-family: monospace; }
 .lightbluetext8 { color: #336699; font-size: 9pt; font-weight: bold; }
 .redtext { color: #cc0000; font-size: 9pt; }
 .redbtext { color: #cc0000; font-weight: bold; }
@@ -309,6 +264,10 @@ body {
 .contactTable {
   background-color: #bde0fc;
   border: 1px solid #8db3d8;
+  margin-bottom: 8px;
+}
+.contactTable td[bgcolor], .contactTable [bgcolor] {
+  background-color: #003366;
 }
 .contactTable a, .contactTableLink {
   color: #003366;
@@ -321,14 +280,67 @@ body {
   text-decoration: underline;
 }
 
+/* Music player */
+.musicPlayer {
+  background-color: #fff;
+  border: 1px solid #b5d2ec;
+  margin-bottom: 8px;
+}
+.profileMusic {
+  padding: 4px 0;
+}
+.profileMusic .musicPlaceholder {
+  color: #666;
+  font-style: italic;
+  font-size: 9pt;
+  margin: 0 0 6px 0;
+}
+.profileAudioPlayer {
+  border-radius: 4px;
+}
+
+/* Posts */
+.profilePosts {
+  background-color: #fff;
+  border: 1px solid #b5d2ec;
+  margin-top: 8px;
+}
+.postEntry {
+  padding: 8px 4px;
+  border-bottom: 1px solid #e8f0f8;
+}
+.postEntry:last-child {
+  border-bottom: none;
+}
+.postContent {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  margin-bottom: 4px;
+}
+.postMeta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 8pt;
+  color: #999;
+}
+.postDate {
+  color: #999;
+}
+.postStats {
+  color: #666;
+}
+
 /* Links */
 a:link, a:visited { color: #003366; }
 a:hover { color: #ff6600; }
 
-/* Tables */
-table { border-collapse: collapse; }
-.profileInfo, .sidebar-table, .extendedNetwork,
-.friendSpace, .friendsComments {
+/* Section boxes */
+.profileInfo {
+  background-color: #fff;
+  border: 1px solid #b5d2ec;
+  margin-bottom: 8px;
+}
+.extendedNetwork {
   background-color: #fff;
   border: 1px solid #b5d2ec;
   margin-bottom: 8px;
@@ -336,6 +348,9 @@ table { border-collapse: collapse; }
 .blurbs {
   background-color: #fff;
   border: 1px solid #b5d2ec;
+  margin-bottom: 8px;
 }
-td { padding: 3px; }
+.blurbsModule {
+  margin-bottom: 8px;
+}
 `;
